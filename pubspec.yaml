@@ -32,6 +32,7 @@ dependencies:
   ping_discover_network: ^0.2.0+1
   dartspatcher: ^0.6.2
   connectivity: ^3.0.3
+  liquid_progress_indicator: ^0.3.2
   # flutter_ip: ^0.2.0
   window_size:
     git:

@@ -1,51 +1,21 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:window_size/window_size.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:ping_discover_network/ping_discover_network.dart';
 // import 'package:connectivity/connectivity.dart';
 // import 'package:flutter_ip/flutter_ip.dart';
-import 'package:dartspatcher/dartspatcher.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    setWindowFrame(Rect.fromLTRB(1200.0, 500.0, 1800.0, 1125.0));
+    // setWindowFrame(Rect.fromLTRB(1200.0, 500.0, 1800.0, 1125.0));
     setWindowMinSize(const Size(1280, 500));
     setWindowMaxSize(Size.infinite);
   }
 
-  Dartspatcher dartspatcher = Dartspatcher();
-  dartspatcher.locals['var'] = 'value';
-
-  dartspatcher.setVirtualDirectory('web');
-
-  dartspatcher.get('/', [
-    (HttpRequest request, Map<String, dynamic> params, Function next,
-        [Map<dynamic, dynamic>? locals]) {
-      print("fire");
-      request.response.close();
-    }
-  ], {
-    'var': 'value'
-  });
-
-  dartspatcher.setMiddleware([
-    (HttpRequest request, Map<String, dynamic> params, Function next,
-        [Map<dynamic, dynamic>? locals]) {
-      print('middlware 2');
-    }
-  ]);
-
-  dartspatcher.setErrorHandler((HttpRequest request, dynamic e, StackTrace s) {
-    print('Error Handler');
-    dartspatcher.close(request, HttpStatus.internalServerError);
-  });
-
-  dartspatcher.listen(InternetAddress.loopbackIPv4, 4040, (HttpServer server) {
-    print('Listening on localhost:${server.port}');
-  });
   runApp(MyApp());
 }
 
@@ -92,8 +62,10 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
   int _counter = 0;
+  AnimationController? _animationController;
 
   void _incrementCounter() {
     setState(() {
@@ -104,6 +76,21 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
+
+    super.initState();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 10),
+    );
+
+    _animationController!.addListener(() {
+      print(23423423423);
+      // setState(() {})
+      //
+      print(_animationController!.value);
+    });
+    _animationController!.repeat();
   }
 
   @override
@@ -134,37 +121,148 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 4,
             child: Container(
               color: Color(0xFFFFFFFF),
-              child: Scrollbar(
-                child: SingleChildScrollView(
-                  child: Column(
+              child: Column(
+                children: [
+                  Image.network(
+                    "https://cdn2.iconfinder.com/data/icons/game-device-2/512/ps4_and_ps4_controller_512.png",
+                    width: 120,
+                  ),
+                  Row(
                     children: [
-                      buildList(),
-                      buildList(),
-                      buildList(),
-                      buildList(),
-                      buildList(),
-                      buildList(),
-                      buildList(),
-                      buildList(),
-                      buildList(),
-                      buildList(),
-                      buildList(),
-                      buildList(),
-                      buildList(),
-                      buildList(),
-                      buildList(),
-                      buildList(),
+                      buildHeaderMenu(),
+                      buildHeaderMenu(),
+                      buildHeaderMenu(),
                     ],
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Row(
+                      children: [
+                        Container(
+                          child: InkWell(
+                            child: Container(
+                              width: 100,
+                              padding: const EdgeInsets.all(10),
+                              child: Row(children: [
+                                Icon(Icons.sort_outlined),
+                                Text("Sort")
+                              ]),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Color(0xFFF7F7F7),
+                                  border: Border.all(color: Colors.grey)),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Padding(
+                            padding: const EdgeInsets.all(30.0),
+                            child: TextField(
+                              decoration: InputDecoration(
+                                  fillColor: Color(0xFFF7F7F7),
+                                  border: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        color: Color(0xFFF7F7F7), width: 10.0),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                        color: Color(0xFFF7F7F7), width: 2.0),
+                                  ),
+                                  hintText: 'Enter a search term'),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Scrollbar(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: Column(
+                          children: [
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                            buildList(),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           )
         ],
       ),
+    );
+  }
+
+  Expanded buildHeaderMenu() {
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+            border: Border(
+                bottom: BorderSide(color: Color(0xFFF1F1F1), width: 3),
+                left: BorderSide(color: Color(0xFFF1F1F1), width: 3))),
+        padding: const EdgeInsets.all(40),
+        child: Center(
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(5),
+                child: Icon(Icons.play_arrow_rounded),
+                decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.all(Radius.circular(20))),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Text(
+                "18",
+                style: TextStyle(fontWeight: FontWeight.w400, fontSize: 40),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Available Courses",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    "Add more to your library",
+                    style: TextStyle(fontSize: 10, color: Color(0xFF80B5F1)),
+                  )
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+      flex: 1,
     );
   }
 
@@ -220,6 +318,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget buildList() {
+    final percentage = (_animationController?.value ?? 0) * 100;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: Container(
@@ -231,7 +330,15 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Expanded(flex: 1, child: Icon(Icons.access_alarm)),
+              // Expanded(flex: 1, child: Icon(Icons.access_alarm)),
+              Expanded(
+                flex: 1,
+                child: Image.network(
+                  "https://i.imgur.com/3JtKV36.png",
+                  width: 50,
+                  height: 50,
+                ),
+              ),
               Expanded(
                 flex: 6,
                 child: Column(
@@ -243,7 +350,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                     ),
                     SizedBox(
-                      height: 20,
+                      height: 11,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -251,15 +358,97 @@ class _MyHomePageState extends State<MyHomePage> {
                         buildSubList(),
                         buildSubList(),
                         buildSubList(),
+                        SizedBox(
+                          width: 30,
+                        ),
                       ],
-                    )
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 10.0,
+                      child: LiquidLinearProgressIndicator(
+                        value: _animationController?.value ?? 0,
+                        backgroundColor: Colors.white,
+                        valueColor: AlwaysStoppedAnimation(Color(0xFF2980b9)),
+                        borderRadius: 12.0,
+                        center: Text(
+                          "${percentage.toStringAsFixed(0)}%",
+                          style: TextStyle(
+                            color: Colors.lightBlueAccent,
+                            fontSize: 7.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // LiquidLinearProgressIndicator(
+                    //   value: _animationController?.value ?? 0,
+                    //   valueColor: AlwaysStoppedAnimation(Colors
+                    //       .pink), // Defaults to the current Theme's accentColor.
+                    //   backgroundColor: Colors
+                    //       .white, // Defaults to the current Theme's backgroundColor.
+                    //   borderColor: Colors.blue,
+                    //   borderWidth: 0.0,
+                    //   borderRadius: 12.0,
+                    //   direction: Axis
+                    //       .vertical, // The direction the liquid moves (Axis.vertical = bottom to top, Axis.horizontal = left to right). Defaults to Axis.horizontal.
+                    //   center: Text("Loading..."),
+                    // )
                   ],
                 ),
               ),
               Expanded(
                   flex: 2,
-                  child:
-                      FlatButton(onPressed: onClick, child: Text("Press Me"))),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        InkWell(
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                                color: Color(0xFF27ae60),
+                                borderRadius: BorderRadius.circular(30)),
+                            child: Icon(
+                              Icons.play_arrow,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                                color: Color(0xFFe74c3c),
+                                borderRadius: BorderRadius.circular(30)),
+                            child: Icon(
+                              Icons.pause,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                                color: Color(0xFFf39c12),
+                                borderRadius: BorderRadius.circular(30)),
+                            child: Icon(
+                              Icons.stop,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ))
             ],
           ),
         ),
@@ -274,6 +463,10 @@ class _MyHomePageState extends State<MyHomePage> {
           Icon(
             Icons.alarm_outlined,
             color: Colors.cyan,
+            size: 20,
+          ),
+          SizedBox(
+            width: 10,
           ),
           Text(
             "Access Expires in 20 hour",
